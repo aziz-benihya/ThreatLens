@@ -1,0 +1,25 @@
+# Generated files — never commit these
+db/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+env/
+venv/
+.env
+
+# Reports (personal documents — keep local)
+reports/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log

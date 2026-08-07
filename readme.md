@@ -1,52 +1,70 @@
-# ThreatLens
+# 🔍 ThreatLens
 
-<p align="center">
-    <img src="images/logo.webp" width="400">
-</p>
+**ThreatLens** is an open-source Cyber Threat Intelligence (CTI) platform that runs entirely on your local machine. It uses Retrieval-Augmented Generation (RAG) to deliver accurate, evidence-grounded answers about cyber threats — with zero data sent to external servers.
 
-**ThreatLens** is a cyber threat intelligence tool that uses local large language models (LLMs) and a vector database to answer your questions about cyber threats. It's built on top of Langchain, Ollama, Chroma, and PyPDF.
+> Built as part of an academic journey in Information Security.
 
-> This project is a fork of [CTrag](https://github.com/search?q=CTrag), enhanced with a new dark-themed UI, multi-format document support (PDF, TXT, DOCX, HTML), and an interactive sidebar.
+---
 
-## Credits
+## How it works
 
-The original project was adapted from [local-LLM-with-RAG](https://github.com/amscotti/local-LLM-with-RAG) by amscotti, then specialized for cyber threat intelligence as CTrag. ThreatLens extends this work with UI improvements and broader document support.
+1. You load threat reports (PDF, DOCX, TXT, HTML) into the `reports/` folder
+2. ThreatLens indexes them into a local vector database (ChromaDB)
+3. You ask a question — the system retrieves the most relevant document chunks
+4. A local LLM (via Ollama) generates a structured, cited answer grounded in those documents
+
+---
+
+## Key features
+
+- **100% local** — powered by Ollama + ChromaDB, no cloud required
+- **Anti-hallucination** — every claim cited with `[SOURCE: filename]`; responds "INSUFFICIENT EVIDENCE" when information is not in loaded documents
+- **Multi-format ingestion** — PDF, DOCX, TXT, HTML
+- **MITRE ATT&CK formatting** — techniques displayed as `T[ID] – Name (Tactic)`
+- **Source attribution** — confidence indicator (HIGH / MEDIUM / LOW) based on supporting sources
+- **Structured responses** — ANALYSIS / MITRE ATT&CK / IOCs / DETECTION / SOURCES
+- **Dark cybersecurity UI** — terminal-style interface
+- **Fully open source** — MIT license
+
+---
 
 ## Requirements
 
-- [Ollama](https://ollama.ai/) version 0.1.26 or higher.
-  - Default model: `llama3`. You can pull others with `ollama pull [MODEL_NAME]`.
+- Python 3.10+
+- [Ollama](https://ollama.ai/) installed and running
+
+### Models needed
+
+```bash
+ollama pull llama3
+ollama pull nomic-embed-text
+```
+
+---
 
 ## Setup
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/YOUR-USERNAME/ThreatLens.git
-   cd ThreatLens
-   ```
-2. Create a Python virtual environment:
-   ```bash
-   python3 -m venv env
-   ```
-3. Activate it:
-   - Unix/macOS: `source env/bin/activate`
-   - Windows: `.\env\Scripts\activate`
-4. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-## Running the project
-
-> **Note:** The first run will download the required Ollama models. This is a one-time process.
-
 ```bash
-streamlit run app.py
+git clone https://github.com/aziz-benihya/ThreatLens.git
+cd ThreatLens
+pip install -r requirements.txt
 ```
 
-## Adding documents to the knowledge base
+---
 
-Place your files in the `reports/` folder. ThreatLens supports:
+## Running
+
+```bash
+python -m streamlit run app.py
+```
+
+> On Windows, use `python -m streamlit run app.py` to avoid Device Guard issues.
+
+---
+
+## Adding documents
+
+Place your files in the `reports/` folder:
 
 | Format | Extension |
 |--------|-----------|
@@ -55,40 +73,44 @@ Place your files in the `reports/` folder. ThreatLens supports:
 | Word document | `.docx` |
 | Web page | `.html` |
 
-The tool will automatically process and index them on the next run.
+To re-index after adding new files:
 
-## Available commands
-
-```
-streamlit run app.py [-m MODEL] [-e EMBEDDING_MODEL] [-p PATH] [--nb-docs NB_DOCS]
-```
-
-| Argument | Default | Description |
-|----------|---------|-------------|
-| `-m MODEL` | `llama3` | LLM model to use |
-| `-e EMBEDDING_MODEL` | `nomic-embed-text` | Embedding model |
-| `-p PATH` | `reports` | Path to documents directory |
-| `--nb-docs NB_DOCS` | `8` | Number of documents retrieved per query |
-
-Example:
 ```bash
-streamlit run app.py -m "llama3" -e "nomic-embed-text" -p "./reports" --nb-docs 10
+rmdir /s /q db          # Windows
+python -m streamlit run app.py
 ```
 
-## Data sources for the pre-built vector database
+---
 
-- [VX-Underground archives](https://vx-underground.org/)
+## Example queries
 
-## Technologies Used
+- *What MITRE ATT&CK techniques does LockBit ransomware use?*
+- *How does APT29 perform lateral movement?*
+- *What are the indicators of compromise for Lazarus Group?*
+- *How do attackers use Pass-the-Hash?*
+- *What AiTM phishing tools bypass MFA?*
 
-- [Langchain](https://github.com/langchain/langchain) — LLM orchestration
-- [Ollama](https://ollama.ai/) — local LLM runtime
-- [Chroma](https://docs.trychroma.com/) — vector database
-- [PyPDF](https://pypi.org/project/PyPDF2/) — PDF parsing
-- [docx2txt](https://pypi.org/project/docx2txt/) — Word document parsing
-- [Unstructured](https://pypi.org/project/unstructured/) — HTML parsing
-- [Streamlit](https://streamlit.io/) — web UI
+---
+
+## Stack
+
+| Component | Technology |
+|-----------|------------|
+| LLM runtime | [Ollama](https://ollama.ai/) |
+| LLM orchestration | [LangChain 0.3.x](https://github.com/langchain-ai/langchain) |
+| Vector database | [ChromaDB](https://docs.trychroma.com/) |
+| PDF parsing | [pypdf](https://pypi.org/project/pypdf/) |
+| DOCX parsing | [docx2txt](https://pypi.org/project/docx2txt/) |
+| HTML parsing | [BeautifulSoup4](https://pypi.org/project/beautifulsoup4/) |
+| Web UI | [Streamlit](https://streamlit.io/) |
+
+---
 
 ## License
 
-This project is licensed under the terms of the MIT license.
+MIT — see [LICENSE](LICENSE)
+
+## Author
+
+**Abdelaaziz AIT BENIHYA** · Information Security Student  
+[@aziz-benihya](https://github.com/aziz-benihya)

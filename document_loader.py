@@ -2,7 +2,7 @@ from langchain_community.document_loaders import (
     DirectoryLoader,
     PyPDFLoader,
     TextLoader,
-    UnstructuredHTMLLoader,
+    BSHTMLLoader,
     Docx2txtLoader,
 )
 import os
@@ -52,7 +52,7 @@ def load_documents(path: str) -> List[Document]:
         ".html": DirectoryLoader(
             path,
             glob="**/*.html",
-            loader_cls=UnstructuredHTMLLoader,
+            loader_cls=BSHTMLLoader,
             show_progress=True,
         ),
     }
