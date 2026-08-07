@@ -1,8 +1,8 @@
 import streamlit as st
-from langchain_community.embeddings import OllamaEmbeddings
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
-from langchain.prompts import PromptTemplate
+from langchain_ollama import OllamaEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_chroma import Chroma
+from langchain_core.prompts import PromptTemplate
 from models import check_if_model_is_available
 from document_loader import load_documents
 import argparse
@@ -144,19 +144,29 @@ def load_documents_into_database(model_name: str, documents_path: str) -> Chroma
     )
     end_time = time.time() - start
     print(f"Time to load documents into Chroma: {end_time:.2f} seconds")
-    db.persist()
+    # chromadb >= 0.5 auto-persists — no explicit .persist() needed
     return db
 
 
 def ollama_generator(model_name: str, messages: Dict) -> Generator:
     stream = ollama.chat(model=model_name, messages=messages, stream=True)
     for chunk in stream:
-        yield chunk["message"]["content"]
+        # Support both old dict API (< 0.2) and new object API (>= 0.2)
+        if hasattr(chunk, "message"):
+            yield chunk.message.content
+        else:
+            yield chunk["message"]["content"]
 
 
 def get_available_models():
     try:
-        return [model["name"] for model in ollama.list()["models"]]
+        result = ollama.list()
+        # New object API (ollama >= 0.2.0)
+        if hasattr(result, "models"):
+            names = [getattr(m, "model", None) for m in result.models]
+        else:
+            names = [m.get("name") for m in result.get("models", [])]
+        return [n for n in names if n] or [DEFAULT_MODEL]
     except Exception:
         return [DEFAULT_MODEL]
 
@@ -192,7 +202,7 @@ def main(llm_model_name: str, embedding_model_name: str, documents_path: str, nb
 
     # ── Sidebar ───────────────────────────────────────────────────────────────
     with st.sidebar:
-        st.image("images/logo.webp", use_column_width=True)
+        st.image("images/logo.webp", use_container_width=True)
         st.markdown("---")
 
         st.markdown("### ⚙️ Settings")
